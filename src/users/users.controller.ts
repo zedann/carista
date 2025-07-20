@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -61,8 +63,10 @@ export class UsersController {
   // }
 
   @Post('signout')
+  @HttpCode(HttpStatus.OK)
   signOut(@Session() session: any) {
     session.userId = null;
+    return 'signed out Successfully';
   }
 
   @Get(':id')
