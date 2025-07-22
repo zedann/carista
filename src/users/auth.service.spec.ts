@@ -7,15 +7,22 @@ describe('AuthService', () => {
   let fakeUsersService: Partial<UsersService>;
 
   beforeEach(async () => {
+    const users: User[] = [];
     // create fake copy of UsersService
     fakeUsersService = {
-      find: () => Promise.resolve([]),
+      find: (email: string) => {
+        const filteredUsers = users.filter((user) => user.email == email);
+        return Promise.resolve(filteredUsers);
+      },
       create: (user: Partial<User>) => {
-        return Promise.resolve({
-          id: 1,
+        const userToCreate = {
+          id: Math.floor(Math.random() * 99999),
           email: user.email,
           password: user.password,
-        } as User);
+        } as User;
+
+        users.push(userToCreate);
+        return Promise.resolve(userToCreate);
       },
     };
     const module = await Test.createTestingModule({
@@ -61,15 +68,22 @@ describe('AuthService', () => {
       });
   });
   it('should throw an error if signin with unused email', (done) => {
-    service.signin('zeda434@asdas.com', '21345').then(()=>{
-      done.fail('expected error to throw')
-    }).catch(()=>{
-      done()
-    })
-    
+    service
+      .signin('zeda434@asdas.com', '21345')
+      .then(() => {
+        done.fail('expected error to throw');
+      })
+      .catch(() => {
+        done();
+      });
   });
 
-  it('should return a user if correct password is provided' , () => {
-
-  })
+  it('should return a user if correct password is provided', async () => {
+    await service.signup('zedan@gmail.com', '123456');
+    try {
+      await service.signin('zedan@gmail.com', '1234564');
+    } catch (err) {
+      fail();
+    }
+  });
 });
