@@ -10,6 +10,7 @@ import {
   Post,
   Query,
   Session,
+  UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -38,7 +39,8 @@ export class UsersController {
       createUserDto.email,
       createUserDto.password,
     );
-    session.userId = user.id;
+    if (!user) throw new UnprocessableEntityException();
+    session.userId = user?.id;
 
     return user;
   }

@@ -14,10 +14,11 @@ export class CurrentUserInterceptor implements NestInterceptor {
   async intercept(context: ExecutionContext, handler: CallHandler<any>) {
     const request = context.switchToHttp().getRequest();
 
-    const { userId } = request.session;
+    // Fix: Check if session exists before destructuring
+    const session = request.session;
+    const userId = session?.userId;
     if (userId) {
       const user = await this.usersService.findOne(userId);
-
       request.currentUser = user;
     }
 

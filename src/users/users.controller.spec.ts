@@ -25,7 +25,9 @@ describe('UsersController', () => {
     };
     fakeAuthService = {
       // signup: () => {},
-      // signin: () => {},
+      signin: (email: string, password: string) => {
+        return Promise.resolve({ id: 1, email } as User);
+      },
     };
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
@@ -46,5 +48,44 @@ describe('UsersController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('findAllUsers', () => {
+    it('should return list of users with email', async () => {
+      const users = await controller.findAllUsers('zedan@gmail.com');
+      expect(users.length).toEqual<number>(1);
+      expect(users[0].email).toBe('zedan@gmail.com');
+    });
+  });
+
+  describe('findUser', () => {
+    it('should return a single user with a given id', async () => {
+      const user = await controller.findUser('1');
+      expect(user).toBeDefined();
+    });
+    it('should throw an error if user with a given id not found', async () => {
+      fakeUsersService.findOne = (id: number) => Promise.resolve(null);
+      const user = await controller.findUser('1');
+      expect(user).toBeNull();
+    });
+  });
+
+  describe('signin', () => {
+    it('should update session object and return user', async () => {
+      const session: {
+        userId?: number;
+      } = {};
+      const user = await controller.signin(
+        {
+          email: 'zedan@gmail.com',
+          password: '123456',
+        },
+        session,
+      );
+      expect(user).toBeDefined();
+      expect(user.id).toEqual(1);
+      expect(session.userId).toBeDefined();
+      expect(session.userId).toEqual(1);
+    });
   });
 });
